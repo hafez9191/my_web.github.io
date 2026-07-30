@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>پنل سنسورها | Hafez Control</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Tahoma, Arial, sans-serif;
+      color: #f8fafc;
+      background:
+        radial-gradient(circle at top right, #1e3a8a 0, transparent 35%),
+        linear-gradient(135deg, #020617, #0f172a);
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: auto;
+      padding: 35px 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: #94a3b8;
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 30px;
+    }
+
+    .connection-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 12px #22c55e;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.82);
+      box-shadow: 0 16px 35px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(10px);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: var(--accent);
+    }
+
+    .card-title {
+      color: #cbd5e1;
+      font-size: 16px;
+    }
+
+    .value {
+      margin: 18px 0 8px;
+      font-size: 43px;
+      font-weight: bold;
+    }
+
+    .unit {
+      color: var(--accent);
+      font-size: 19px;
+    }
+
+    .status {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .bar {
+      height: 8px;
+      margin-top: 20px;
+      overflow: hidden;
+      background: #1e293b;
+      border-radius: 20px;
+    }
+
+    .bar-fill {
+      width: 50%;
+      height: 100%;
+      border-radius: 20px;
+      background: var(--accent);
+      transition: width 0.25s ease;
+    }
+
+    .controls {
+      margin-top: 22px;
+      padding: 24px;
+      border: 1px solid #334155;
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.86);
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 80px;
+      align-items: center;
+      gap: 16px;
+      margin: 18px 0;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+
+    .control-value {
+      padding: 8px;
+      text-align: center;
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 10px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    button {
+      padding: 12px 22px;
+      color: white;
+      font-family: inherit;
+      font-size: 15px;
+      border: 0;
+      border-radius: 12px;
+      background: #2563eb;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: #1d4ed8;
+    }
+
+    button.secondary {
+      background: #334155;
+    }
+
+    button.danger {
+      background: #dc2626;
+    }
+
+    .alarm {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      color: #fecaca;
+      text-align: center;
+      background: rgba(127, 29, 29, 0.65);
+      border: 1px solid #ef4444;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 800px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .control-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <header>
+      <div>
+        <h1>پنل مانیتورینگ IoT</h1>
+        <div class="subtitle">Hafez Control — داده‌های شبیه‌سازی‌شده</div>
+      </div>
+
+      <div class="connection">
+        <span class="connection-dot" id="connectionDot"></span>
+        <span id="connectionText">اتصال آنلاین</span>
+      </div>
+    </header>
+
+    <section class="cards">
+
+      <article class="card" style="--accent:#fb923c;">
+        <div class="card-title">دمای مخزن</div>
+
+        <div class="value">
+          <span id="temperature">32</span>
+          <span class="unit">°C</span>
+        </div>
+
+        <div class="status" id="temperatureStatus">وضعیت عادی</div>
+
+        <div class="bar">
+          <div class="bar-fill" id="temperatureBar"></div>
+        </div>
+      </article>
+
+      <article class="card" style="--accent:#38bdf8;">
+        <div class="card-title">فشار خط</div>
+
+        <div class="value">
+          <span id="pressure">4.2</span>
+          <span class="unit">bar</span>
+        </div>
+
+        <div class="status" id="pressureStatus">فشار پایدار</div>
+
+        <div class="bar">
+          <div class="bar-fill" id="pressureBar"></div>
+        </div>
+      </article>
+
+      <article class="card" style="--accent:#22c55e;">
+        <div class="card-title">رطوبت محیط</div>
+
+        <div class="value">
+          <span id="humidity">45</span>
+          <span class="unit">%</span>
+        </div>
+
+        <div class="status" id="humidityStatus">محدوده مناسب</div>
+
+        <div class="bar">
+          <div class="bar-fill" id="humidityBar"></div>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="controls">
+
+      <h2>شبیه‌سازی ورودی سنسورها</h2>
+
+      <div class="control-row">
+        <label for="temperatureSlider">دمای تستی</label>
+
+        <input
+          id="temperatureSlider"
+          type="range"
+          min="0"
+          max="100"
+          value="32"
+        >
+
+        <div class="control-value">
+          <span id="temperatureControlValue">32</span> °C
+        </div>
+      </div>
+
+      <div class="control-row">
+        <label for="pressureSlider">فشار تستی</label>
+
+        <input
+          id="pressureSlider"
+          type="range"
+          min="0"
+          max="10"
+          value="4.2"
+          step="0.1"
+        >
+
+        <div class="control-value">
+          <span id="pressureControlValue">4.2</span> bar
+        </div>
+      </div>
+
+      <div class="control-row">
+        <label for="humiditySlider">رطوبت تستی</label>
+
+        <input
+          id="humiditySlider"
+          type="range"
+          min="0"
+          max="100"
+          value="45"
+        >
+
+        <div class="control-value">
+          <span id="humidityControlValue">45</span> %
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button onclick="randomValues()">تولید مقدار تصادفی</button>
+
+        <button class="secondary" onclick="resetValues()">
+          بازنشانی
+        </button>
+
+        <button class="danger" onclick="toggleConnection()">
+          قطع / وصل ارتباط
+        </button>
+      </div>
+
+      <div class="alarm" id="alarmBox">
+        هشدار: یکی از مقادیر از محدوده مجاز خارج شده است.
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const temperatureSlider =
+      document.getElementById("temperatureSlider");
+
+    const pressureSlider =
+      document.getElementById("pressureSlider");
+
+    const humiditySlider =
+      document.getElementById("humiditySlider");
+
+    let connected = true;
+
+    function updatePanel() {
+      const temperature = Number(temperatureSlider.value);
+      const pressure = Number(pressureSlider.value);
+      const humidity = Number(humiditySlider.value);
+
+      document.getElementById("temperature").textContent =
+        temperature;
+
+      document.getElementById("pressure").textContent =
+        pressure.toFixed(1);
+
+      document.getElementById("humidity").textContent =
+        humidity;
+
+      document.getElementById("temperatureControlValue").textContent =
+        temperature;
+
+      document.getElementById("pressureControlValue").textContent =
+        pressure.toFixed(1);
+
+      document.getElementById("humidityControlValue").textContent =
+        humidity;
+
+      document.getElementById("temperatureBar").style.width =
+        temperature + "%";
+
+      document.getElementById("pressureBar").style.width =
+        pressure * 10 + "%";
+
+      document.getElementById("humidityBar").style.width =
+        humidity + "%";
+
+      const temperatureAlarm = temperature > 70;
+      const pressureAlarm = pressure > 7.5;
+      const humidityAlarm = humidity > 80;
+
+      document.getElementById("temperatureStatus").textContent =
+        temperatureAlarm ? "دمای بالا" : "وضعیت عادی";
+
+      document.getElementById("pressureStatus").textContent =
+        pressureAlarm ? "فشار بالا" : "فشار پایدار";
+
+      document.getElementById("humidityStatus").textContent =
+        humidityAlarm ? "رطوبت زیاد" : "محدوده مناسب";
+
+      document.getElementById("alarmBox").style.display =
+        temperatureAlarm || pressureAlarm || humidityAlarm
+          ? "block"
+          : "none";
+    }
+
+    function randomValues() {
+      temperatureSlider.value =
+        Math.floor(Math.random() * 101);
+
+      pressureSlider.value =
+        (Math.random() * 10).toFixed(1);
+
+      humiditySlider.value =
+        Math.floor(Math.random() * 101);
+
+      updatePanel();
+    }
+
+    function resetValues() {
+      temperatureSlider.value = 32;
+      pressureSlider.value = 4.2;
+      humiditySlider.value = 45;
+
+      updatePanel();
+    }
+
+    function toggleConnection() {
+      connected = !connected;
+
+      const dot = document.getElementById("connectionDot");
+      const text = document.getElementById("connectionText");
+
+      if (connected) {
+        dot.style.background = "#22c55e";
+        dot.style.boxShadow = "0 0 12px #22c55e";
+        text.textContent = "اتصال آنلاین";
+      } else {
+        dot.style.background = "#ef4444";
+        dot.style.boxShadow = "0 0 12px #ef4444";
+        text.textContent = "ارتباط قطع است";
+      }
+    }
+
+    temperatureSlider.addEventListener("input", updatePanel);
+    pressureSlider.addEventListener("input", updatePanel);
+    humiditySlider.addEventListener("input", updatePanel);
+
+    updatePanel();
+  </script>
+
+</body>
+</html>
